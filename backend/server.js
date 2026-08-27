@@ -2301,6 +2301,29 @@ app.post('/api/users/device-change/verify', async (req, res) => {
 });
 
 // ==========================================
+// 🔐 Security & Biometric API
+// ==========================================
+app.put('/api/users/security/biometric', verifyToken, async (req, res) => {
+    try {
+        const { enabled, deviceId } = req.body;
+        const user = await findUserFlexible(req.user.id || req.user._id);
+        if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+
+        user.biometricEnabled = Boolean(enabled);
+        user.biometricDeviceId = enabled ? (deviceId || user.deviceId) : null;
+        await user.save();
+
+        res.json({
+            success: true,
+            message: enabled ? 'تم تفعيل الدخول بالبصمة على السيرفر' : 'تم تعطيل الدخول بالبصمة على السيرفر',
+            biometricEnabled: user.biometricEnabled
+        });
+    } catch (e) {
+        res.status(500).json({ success: false, message: 'خطأ في السيرفر', error: e.message });
+    }
+});
+
+// ==========================================
 // 🏢 Admin Dashboard API - Devices
 // ==========================================
 app.get('/api/admin/devices', async (req, res) => {

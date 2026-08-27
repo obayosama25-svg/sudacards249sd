@@ -40,6 +40,8 @@ const userSchema = new mongoose.Schema({
     // System fields
     deviceId: { type: String, required: true },
     isActive: { type: Boolean, default: true },
+    biometricEnabled: { type: Boolean, default: false },
+    biometricDeviceId: { type: String, default: null },
     userType: { 
         type: String, 
         enum: ['personal', 'merchant', 'company', 'restaurant', 'cafe', 'hospital', 'health_center', 'pharmacy', 'university'], 
