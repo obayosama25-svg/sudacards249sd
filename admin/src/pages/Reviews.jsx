@@ -7,12 +7,22 @@ import {
 } from 'lucide-react';
 
 
+// Helper function to format image URLs
+const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  let cleanPath = path.replace(/\\/g, '/');
+  if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+  return `http://2.24.108.101:5000${cleanPath}`;
+};
+
 /* ==========================================
    DYNAMIC DOCUMENT GENERATOR (SVG MOCKUPS)
    ========================================== */
 function DocumentCard({ req, onZoom, isZoomedView = false }) {
   const isPersonal = req.userType === 'personal';
-  const fullName = `${req.firstName} ${req.middleName || ''} ${req.lastName}`;
+  const fullName = `${req.firstName} ${req.middleName || ''} ${req.lastName}`.trim();
+  const userPhoto = getImageUrl(req.personalPhotoPath || req.idImagePath || req.idPhotoPath);
 
   if (isPersonal) {
     return (
@@ -40,10 +50,21 @@ function DocumentCard({ req, onZoom, isZoomedView = false }) {
 
         {/* Content Body */}
         <div className="flex gap-5 items-center mt-2">
-          {/* Mock Photo */}
-          <div className="w-20 h-24 rounded-lg border border-emerald-500/20 bg-emerald-950/40 flex flex-col items-center justify-center relative overflow-hidden shrink-0">
-            <User size={38} className="text-emerald-500/30" />
-            <div className="absolute bottom-1 w-full text-center text-[7px] text-emerald-400/60 font-mono">SECURE PHOTO</div>
+          {/* User Photo */}
+          <div className="w-20 h-24 rounded-lg border border-emerald-500/30 bg-emerald-950/40 flex flex-col items-center justify-center relative overflow-hidden shrink-0 shadow-md">
+            {userPhoto ? (
+              <img 
+                src={userPhoto} 
+                alt={fullName} 
+                className="w-full h-full object-cover" 
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <User size={38} className="text-emerald-500/30" />
+            )}
+            <div className="absolute bottom-0 w-full text-center text-[7px] text-emerald-300 font-mono bg-black/70 py-0.5">SECURE PHOTO</div>
           </div>
 
           {/* User details */}
@@ -502,13 +523,13 @@ export default function Reviews() {
                           <p className="text-xs text-emerald-400 font-bold z-10 relative">الصورة الشخصية (Selfie)</p>
                           <div 
                             onClick={() => {
-                              setZoomedImg(`http://2.24.108.101:5000${selectedReq.personalPhotoPath}`);
+                              setZoomedImg(getImageUrl(selectedReq.personalPhotoPath));
                               setIsZoomed(true);
                             }}
                             className="bg-black/40 rounded-xl flex justify-center items-center h-36 border border-white/10 overflow-hidden cursor-zoom-in relative z-10 shadow-inner"
                           >
                             <img 
-                              src={`http://2.24.108.101:5000${selectedReq.personalPhotoPath}`} 
+                              src={getImageUrl(selectedReq.personalPhotoPath)} 
                               alt="Selfie" 
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />
@@ -520,18 +541,18 @@ export default function Reviews() {
                       )}
 
                       {/* صورة الهوية */}
-                      {selectedReq.idImagePath && (
+                      {(selectedReq.idImagePath || selectedReq.idPhotoPath) && (
                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-3 relative overflow-hidden group hover:border-blue-500/40 hover:bg-white/10 transition-all">
                           <p className="text-xs text-blue-400 font-bold z-10 relative">إثبات الهوية / المستند</p>
                           <div 
                             onClick={() => {
-                              setZoomedImg(`http://2.24.108.101:5000${selectedReq.idImagePath}`);
+                              setZoomedImg(getImageUrl(selectedReq.idImagePath || selectedReq.idPhotoPath));
                               setIsZoomed(true);
                             }}
                             className="bg-black/40 rounded-xl flex justify-center items-center h-36 border border-white/10 overflow-hidden cursor-zoom-in relative z-10 shadow-inner"
                           >
                             <img 
-                              src={`http://2.24.108.101:5000${selectedReq.idImagePath}`} 
+                              src={getImageUrl(selectedReq.idImagePath || selectedReq.idPhotoPath)} 
                               alt="ID Document" 
                               className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-700"
                             />
@@ -548,13 +569,13 @@ export default function Reviews() {
                           <p className="text-xs text-amber-400 font-bold z-10 relative">نموذج التوقيع الحي</p>
                           <div 
                             onClick={() => {
-                              setZoomedImg(`http://2.24.108.101:5000${selectedReq.signaturePhotoPath}`);
+                              setZoomedImg(getImageUrl(selectedReq.signaturePhotoPath));
                               setIsZoomed(true);
                             }}
                             className="bg-white rounded-xl flex justify-center items-center h-36 border border-white/10 overflow-hidden cursor-zoom-in relative z-10 p-2 shadow-inner"
                           >
                             <img 
-                              src={`http://2.24.108.101:5000${selectedReq.signaturePhotoPath}`} 
+                              src={getImageUrl(selectedReq.signaturePhotoPath)} 
                               alt="Signature" 
                               className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-700 mix-blend-multiply"
                             />
@@ -571,13 +592,13 @@ export default function Reviews() {
                           <p className="text-xs text-purple-400 font-bold z-10 relative">شعار المنشأة / اللوجو</p>
                           <div 
                             onClick={() => {
-                              setZoomedImg(`http://2.24.108.101:5000${selectedReq.logoPhotoPath}`);
+                              setZoomedImg(getImageUrl(selectedReq.logoPhotoPath));
                               setIsZoomed(true);
                             }}
                             className="bg-black/40 rounded-xl flex justify-center items-center h-36 border border-white/10 overflow-hidden cursor-zoom-in relative z-10 shadow-inner"
                           >
                             <img 
-                              src={`http://2.24.108.101:5000${selectedReq.logoPhotoPath}`} 
+                              src={getImageUrl(selectedReq.logoPhotoPath)} 
                               alt="Logo" 
                               className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-700"
                             />

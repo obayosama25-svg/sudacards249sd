@@ -10,7 +10,7 @@ const crypto = require('crypto');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { sendOTPEmail } = require('./utils/mailer');
+const { sendOTPEmail, sendApprovalEmail } = require('./utils/mailer');
 
 function sha256(string) {
     return crypto.createHash('sha256').update(string).digest('hex');
@@ -1146,6 +1146,14 @@ app.put('/api/users/:id/approve', verifyToken, checkRole(['superadmin', 'manager
         user.isActive = true;
         await user.save();
 
+        // 📧 إرسال بريد إلكتروني رسمي للعميل بنجاح التفعيل
+        try {
+            const fullName = `${user.firstName} ${user.middleName || ''} ${user.lastName}`.trim();
+            await sendApprovalEmail(user.email, fullName, user.accountNumber);
+        } catch (emailErr) {
+            console.error('Failed to send approval email:', emailErr);
+        }
+
         await AuditLog.create({
             adminId: req.user.id, adminName: req.user.fullName,
             action: 'APPROVE_USER_REGISTRATION',
@@ -1153,7 +1161,7 @@ app.put('/api/users/:id/approve', verifyToken, checkRole(['superadmin', 'manager
             details: { userId: user.userId, email: user.email },
         });
 
-        res.json({ success: true, message: 'تم قبول وتفعيل الحساب بنجاح', data: user });
+        res.json({ success: true, message: 'تم قبول وتفعيل الحساب وإرسال بريد التأكيد بنجاح', data: user });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
