@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -2322,6 +2322,41 @@ app.get('/api/admin/devices/:deviceId', async (req, res) => {
     }
 });
 
+
+const NfcCard = require('./models/NfcCard');
+
+// ==========================================
+// 💳 Admin Dashboard API - NFC Cards
+// ==========================================
+app.get('/api/admin/nfc-cards', async (req, res) => {
+    try {
+        const cards = await NfcCard.find().populate('user', 'firstName lastName email accountNumber');
+        res.json({ success: true, cards });
+    } catch (e) {
+        res.status(500).json({ success: false, message: 'خطأ في استرجاع البطاقات', error: e.message });
+    }
+});
+
+app.post('/api/admin/nfc-cards', async (req, res) => {
+    try {
+        const { cardId, user, type } = req.body;
+        const newCard = new NfcCard({ cardId, user, type, status: 'Active' });
+        await newCard.save();
+        res.json({ success: true, message: 'تم إصدار البطاقة بنجاح', card: newCard });
+    } catch (e) {
+        res.status(500).json({ success: false, message: 'فشل إصدار البطاقة', error: e.message });
+    }
+});
+
+app.put('/api/admin/nfc-cards/:id/status', async (req, res) => {
+    try {
+        const { status } = req.body;
+        const card = await NfcCard.findByIdAndUpdate(req.params.id, { status }, { new: true });
+        res.json({ success: true, message: 'تم تحديث حالة البطاقة', card });
+    } catch (e) {
+        res.status(500).json({ success: false, message: 'فشل تحديث حالة البطاقة', error: e.message });
+    }
+});
 
 // تشغيل السيميوليتور
 startTransactionSimulator();

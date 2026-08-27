@@ -117,3 +117,8 @@ export const testBankGateway = (id) => apiFetch(`/admin/bank-gateways/${id}/test
 // ─── Devices ─────────────────────────────────────────────────
 export const getDevices = () => apiFetch('/admin/devices');
 export const getDeviceDetails = (id) => apiFetch(`/admin/devices/${id}`);
+
+// ─── NFC Cards ───────────────────────────────────────────────
+export const getNfcCards = () => apiFetch('/admin/nfc-cards');
+export const createNfcCard = (data) => apiFetch('/admin/nfc-cards', { method: 'POST', body: JSON.stringify(data) });
+export const updateNfcCardStatus = (id, status) => apiFetch(`/admin/nfc-cards/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
